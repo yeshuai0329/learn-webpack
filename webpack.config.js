@@ -1,7 +1,7 @@
 const path = require('path')
 const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
-const webpack = require('webpack')
+const { HotModuleReplacementPlugin } = require('webpack')
 
 module.exports = {
   mode: 'development',
@@ -9,7 +9,29 @@ module.exports = {
   entry: [path.resolve(__dirname, './src/index.tsx')],
   // 出口
   output: {
-    path: path.resolve(__dirname,'dist')
+    path: path.resolve(__dirname, 'dist')
+  },
+
+  // 模块解析
+  module: {
+    // 规则
+    rules: [
+      { test: /\.tsx?$/, use: ['awesome-typescript-loader'] },
+      {
+        test: /(\.css)|(\.less)$/i,
+        use: ['style-loader', 'css-loader', 'less-loader',]
+      },
+      {
+        test: /\.html$/,
+        use: [
+          { loader: "html-loader" }
+        ]
+      },
+      {
+        test: /\.(jpg|png|gif|jpeg)$/i,
+        use: ["file-loader"]
+      }
+    ]
   },
   // 插件
   plugins: [
@@ -18,32 +40,19 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: './public/index.html'
     }),
-    new webpack.ProgressPlugin({
-      activeModules: false,
-      entries: true,
-      modules: true,
-      modulesCount: 5000,
-      profile: false,
-      dependencies: true,
-      dependenciesCount: 10000,
-      percentBy: 'entries',
-    })
+    new HotModuleReplacementPlugin()
   ],
-  // loader
-  module: {
-    rules:[
-      {test: /\.tsx?$/, use: [{loader: 'awesome-typescript-loader'}] },
-      {
-        test: /\.html$/,
-        use: [
-          { loader: "html-loader" }
-        ]
-      }
-
-    ]
-  },
   resolve: {
     extensions: [".ts", ".tsx", ".js", ".json"]
   },
-  devtool: 'source-map'
+  devServer: {
+    // contentBase: './dist',
+    compress: true,
+    hot: true,
+    client: {
+      logging: 'none',
+      progress: true,
+    },
+  },
+  devtool: 'source-map',
 }
